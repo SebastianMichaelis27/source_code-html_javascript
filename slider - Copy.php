@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Slider Fleksibel dengan Gap</title>
+  <title>Slider Fleksibel</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     .slider {
       position: relative;
+      max-width: 600px;
+      margin: 40px auto;
       overflow: hidden;
       border-radius: 10px;
       touch-action: pan-y;
@@ -18,7 +20,6 @@
       display: flex;
       transition: transform 0.3s ease;
       will-change: transform;
-      gap: 16px; /* <-- tambahkan gap */
     }
 
     .slide {
@@ -64,7 +65,6 @@ function initSlider(sliderId, items, visibleCount = 1) {
   `;
 
   const slidesContainer = slider.querySelector('.slides');
-  const gap = 16; // jarak antar slide (px)
 
   const slides = [];
   for (let i = items.length - visibleCount; i < items.length; i++) {
@@ -81,13 +81,12 @@ function initSlider(sliderId, items, visibleCount = 1) {
   const allSlides = slidesContainer.querySelectorAll('.slide');
 
   allSlides.forEach(slide => {
-    slide.style.flexShrink = '0';
+    slide.style.minWidth = (100 / visibleCount) + '%';
   });
 
   let index = visibleCount;
   let sliderWidth = slider.offsetWidth;
-  let slideWidth = 0;
-  let slideStep = 0;
+  let slideStep = sliderWidth / visibleCount;
   let isDragging = false;
   let startX = 0;
   let currentTranslate = 0;
@@ -102,13 +101,7 @@ function initSlider(sliderId, items, visibleCount = 1) {
 
   function updateDimensions() {
     sliderWidth = slider.offsetWidth;
-    slideWidth = (sliderWidth - gap * (visibleCount - 1)) / visibleCount;
-    slideStep = slideWidth + gap;
-
-    allSlides.forEach(slide => {
-      slide.style.minWidth = slideWidth + 'px';
-    });
-
+    slideStep = sliderWidth / visibleCount;
     setPosition();
   }
 
@@ -116,6 +109,7 @@ function initSlider(sliderId, items, visibleCount = 1) {
     index++;
     slidesContainer.style.transition = 'transform 0.3s ease';
     setPosition();
+
     if (index >= allSlides.length - visibleCount) {
       setTimeout(() => {
         slidesContainer.style.transition = 'none';
@@ -129,7 +123,9 @@ function initSlider(sliderId, items, visibleCount = 1) {
     index--;
     slidesContainer.style.transition = 'transform 0.3s ease';
     setPosition();
+
     if (index < visibleCount) {
+      // Deteksi jika ini adalah klik pertama kali dari posisi awal (agar tetap ada animasi)
       if (index === visibleCount - 1) {
         setTimeout(() => {
           slidesContainer.style.transition = 'none';
@@ -154,7 +150,6 @@ function initSlider(sliderId, items, visibleCount = 1) {
     clearInterval(autoSlide);
   }
 
-  // Touch & Mouse Events
   slider.addEventListener('touchstart', (e) => {
     isDragging = true;
     startX = e.touches[0].clientX;
@@ -173,17 +168,22 @@ function initSlider(sliderId, items, visibleCount = 1) {
     isDragging = false;
     const movedBy = currentTranslate - prevTranslate;
     const threshold = slideStep * 0.1;
-    if (movedBy < -threshold) nextSlide();
-    else if (movedBy > threshold) prevSlide();
-    else {
+
+    if (movedBy < -threshold) {
+      nextSlide();
+    } else if (movedBy > threshold) {
+      prevSlide();
+    } else {
       slidesContainer.style.transition = 'transform 0.3s ease';
       setPosition();
     }
+
     startAutoSlide();
   });
 
   let mouseDown = false;
 
+  // Mouse Events
   slider.addEventListener('mousedown', (e) => {
     isDragging = true;
     mouseDown = true;
@@ -205,9 +205,11 @@ function initSlider(sliderId, items, visibleCount = 1) {
     mouseDown = false;
     const movedBy = currentTranslate - prevTranslate;
     const threshold = slideStep * 0.1;
-    if (movedBy < -threshold) nextSlide();
-    else if (movedBy > threshold) prevSlide();
-    else {
+    if (movedBy < -threshold) {
+      nextSlide();
+    } else if (movedBy > threshold) {
+      prevSlide();
+    } else {
       slidesContainer.style.transition = 'transform 0.3s ease';
       setPosition();
     }
@@ -215,14 +217,17 @@ function initSlider(sliderId, items, visibleCount = 1) {
   });
 
   slider.addEventListener('mouseleave', () => {
+    // agar tidak stuck jika mouse keluar saat drag
     if (isDragging && mouseDown) {
       isDragging = false;
       mouseDown = false;
       const movedBy = currentTranslate - prevTranslate;
       const threshold = slideStep * 0.1;
-      if (movedBy < -threshold) nextSlide();
-      else if (movedBy > threshold) prevSlide();
-      else {
+      if (movedBy < -threshold) {
+        nextSlide();
+      } else if (movedBy > threshold) {
+        prevSlide();
+      } else {
         slidesContainer.style.transition = 'transform 0.3s ease';
         setPosition();
       }
