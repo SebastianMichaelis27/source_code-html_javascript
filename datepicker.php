@@ -102,7 +102,7 @@
 
  function setDatePicker(inputId)
   { const input = document.getElementById(inputId);
-    if (!input) return;
+    if(!input) return;
     // buat wrapper
     const wrapper = document.createElement('div');
     wrapper.className = 'datepicker';
@@ -137,7 +137,7 @@
      <div class='calendar-dates'></div>
     `;
     // replace input
-    input.parentNode.replaceChild(wrapper, input);
+    input.replaceWith(wrapper);
     wrapper.appendChild(box_input);
     wrapper.appendChild(calendar);
     terapkanDatePicker(inputId);
