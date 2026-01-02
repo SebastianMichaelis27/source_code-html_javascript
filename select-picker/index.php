@@ -73,7 +73,7 @@
  setSelectChosen('ini', true);
  setSelectChosen('ini2', false, 'get.php', {});
 
- function setSelectChosen(inputId, allow_new = false, url = null, parameter = null)
+ function setSelectChosen(inputId, allow_new = false, url = null, parameter = {})
   { const select = document.getElementById(inputId);
     if(!select) return;
 
@@ -184,7 +184,6 @@
              </li>
             `;
             options.style.display = 'block';
-
            });
          }, 300);
 
