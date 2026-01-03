@@ -187,29 +187,28 @@
 
      input.addEventListener('blur', () => {
       setTimeout(() => {
-       if(!allow_new)
-        { const text = input.value.trim().toLowerCase();
-          const items = options.querySelectorAll('li');
-          let matchedItem = null;
-          items.forEach(item => {
-           if(item.textContent.toLowerCase() === text)
-            { matchedItem = item;
-            }
-          });
-          if(!matchedItem)
-           { input.value = '';
-             newSelect.value = '';
-             resetOptions();
-           }
-          else
-           { input.value = matchedItem.textContent;
-             setSelectValue(newSelect, matchedItem.dataset.value);
-           }
-          options.style.display = 'none';
+       const text = input.value.trim().toLowerCase();
+       const items = options.querySelectorAll('li');
+       let matchedItem = null;
+       items.forEach(item => {
+        if(item.textContent.toLowerCase() === text)
+         { matchedItem = item;
+         }
+       });
+       if(matchedItem)
+        { setSelectValue(newSelect, matchedItem.dataset.value);
         }
        else
-        { setSelectValue(newSelect, input.value);
+        { if(allow_new)
+           { setSelectValue(newSelect, input.value);
+           }
+          else
+           { input.value = '';
+             newSelect.value = '';
+           }
         }
+       resetOptions();
+       options.style.display = 'none';
       }, 150); // delay kecil agar klik tetap kebaca
     });
 
