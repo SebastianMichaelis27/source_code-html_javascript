@@ -70,7 +70,7 @@
 
 <script>
 
- setSelectChosen(document.querySelector('#ini'), true);
+ setSelectChosen(document.querySelector('#ini'), false);
  setSelectChosen(document.querySelector('#ini2'), false, 'get.php', {});
 
  function setSelectChosen(select, allow_new = false, url = null, parameter = {})
@@ -187,7 +187,18 @@
 
      input.addEventListener('blur', () => {
       setTimeout(() => {
-       const text = input.value.trim().toLowerCase();
+       selectOption();
+      }, 150); // delay kecil agar klik tetap kebaca
+    });
+
+    document.addEventListener('mousedown', e => {
+     if(!e.target.closest('.custom-select'))
+      { selectOption();
+      }
+    });
+
+    function selectOption()
+     { const text = input.value.trim().toLowerCase();
        const items = options.querySelectorAll('li');
        let matchedItem = null;
        items.forEach(item => {
@@ -209,8 +220,7 @@
         }
        resetOptions();
        options.style.display = 'none';
-      }, 150); // delay kecil agar klik tetap kebaca
-    });
+     }
 
     function resetOptions() {
      if(options.querySelectorAll('.option-error').length > 0)
