@@ -68,10 +68,12 @@
 <button type='button' onclick="alert(document.getElementById('ini').value);">Ini</button>
 <button type='button' onclick="alert(document.getElementById('ini2').value);">Ini 2</button>
 
+<input type='hidden' id='parameter'>
+
 <script>
 
  setSelectChosen(document.querySelector('#ini'), false);
- setSelectChosen(document.querySelector('#ini2'), false, 'get.php', {});
+ setSelectChosen(document.querySelector('#ini2'), false, 'get.php', {id: document.getElementById('parameter')} );
 
  function setSelectChosen(select, allow_new = false, url = null, parameter = {})
   { if(!select) return;
@@ -130,7 +132,12 @@
 
          const keyword = input.value.trim();
          clearTimeout(searchTimeout);
-         parameter['search'] = input.value;
+
+         var param = {};
+         param['search'] = input.value;
+         for(let key in parameter)
+          { param[key] = parameter[key].value;
+          }
 
          searchTimeout = setTimeout(() => {
 
@@ -147,7 +154,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: new URLSearchParams(parameter).toString()
+            body: new URLSearchParams(param).toString()
            })
            .then(res => {
             if(!res.ok)

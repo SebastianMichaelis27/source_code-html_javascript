@@ -177,7 +177,12 @@
 
         const keyword = input.value.trim();
         clearTimeout(searchTimeout);
-        parameter['search'] = input.value;
+
+        var param = {};
+        param['search'] = input.value;
+        for(let key in parameter)
+         { param[key] = parameter[key].value;
+         }
 
         searchTimeout = setTimeout(() => {
          if(keyword.length === 0)
@@ -190,7 +195,7 @@
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
           },
-          body: new URLSearchParams(parameter).toString()
+          body: new URLSearchParams(param).toString()
          })
          .then(res => {
           if(!res.ok)
