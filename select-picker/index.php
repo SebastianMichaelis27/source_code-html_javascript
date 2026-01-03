@@ -4,7 +4,6 @@
    font-family : Arial, sans-serif;
    display : inline-block;
  }
-
 .custom-select::after {
   content: "▼";
   position: absolute;
@@ -15,7 +14,6 @@
   font-size: 12px;
   color: #555;
 }
-
 .custom-select .options
  { list-style : none;
    margin : 0;
@@ -40,7 +38,6 @@
 .custom-select .options li.active
  { background : #e0e0e0;
  }
-
 </style>
 
 <select id='ini'>
@@ -67,15 +64,17 @@
   </ul>
 </div>
 -->
+<br>
+<button type='button' onclick="alert(document.getElementById('ini').value);">Ini</button>
+<button type='button' onclick="alert(document.getElementById('ini2').value);">Ini 2</button>
 
 <script>
 
- setSelectChosen('ini', true);
- setSelectChosen('ini2', false, 'get.php', {});
+ setSelectChosen(document.querySelector('#ini'), true);
+ setSelectChosen(document.querySelector('#ini2'), false, 'get.php', {});
 
- function setSelectChosen(inputId, allow_new = false, url = null, parameter = {})
-  { const select = document.getElementById(inputId);
-    if(!select) return;
+ function setSelectChosen(select, allow_new = false, url = null, parameter = {})
+  { if(!select) return;
 
     const newSelect = select.cloneNode(true);
     newSelect.style.display = 'none';
@@ -88,14 +87,10 @@
     input.style.paddingRight = '18px';
     input.placeholder = 'Pilih...';
     input.autocomplete = 'new-password';
-    if(input.querySelectorAll('option').length > 0)
+    if(select.value !== "")
      { input.value = select.options[select.selectedIndex].text;
      }
     custom_select.appendChild(input);
-
-    const hiddenInput = document.createElement('hidden');
-    hiddenInput.value = select.value;
-    custom_select.appendChild(hiddenInput);
 
     const options = document.createElement('ul');
     options.className = 'options';
@@ -203,14 +198,17 @@
           });
           if(!matchedItem)
            { input.value = '';
-             hiddenInput.value = '';
+             newSelect.value = '';
              resetOptions();
            }
           else
            { input.value = matchedItem.textContent;
-             hiddenInput.value = matchedItem.dataset.value;
+             setSelectValue(newSelect, matchedItem.dataset.value);
            }
           options.style.display = 'none';
+        }
+       else
+        { setSelectValue(newSelect, input.value);
         }
       }, 150); // delay kecil agar klik tetap kebaca
     });
@@ -230,7 +228,7 @@
     options.addEventListener('click', e => {
      if(e.target.tagName === 'LI')
       { input.value = e.target.textContent;
-        hiddenInput.value = e.target.dataset.value;
+        setSelectValue(newSelect, e.target.dataset.value, e.target.textContent);
         options.style.display = 'none';
       }
     });
@@ -285,6 +283,17 @@
          block: 'nearest'
        });
      }
+
+    function setSelectValue(select, value, text = value)
+     { let option = select.querySelector(`option[value="${value}"]`);
+       if(!option)
+        { option = new Option(text, value);
+          select.add(option);
+        }
+       select.value = value;
+     }
+
+
   }
 
 </script>
