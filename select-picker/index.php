@@ -76,7 +76,7 @@
  setSelectChosen(document.querySelector('#ini2'), false, 'get.php', {id: document.getElementById('parameter')} );
 
  function setSelectChosen(select, allow_new = false, url = null, parameter = {})
-  { if(!select) return;
+  { if(!select || select.parentNode.className == 'custom-select') return;
 
     const newSelect = select.cloneNode(true);
     newSelect.style.display = 'none';
@@ -109,7 +109,9 @@
     custom_select.appendChild(newSelect);
     select.replaceWith(custom_select);
 
+    let isFocused = false;
     input.addEventListener('focus', () => {
+     isFocused = true;
      input.select();
      resetOptions();
      options.style.display = 'block';
@@ -173,7 +175,7 @@
              }
             data.forEach(row => {
              const li = document.createElement('li');
-             li.textContent = row.label;
+             li.textContent = row.text;
              li.dataset.value = row.value;
              options.appendChild(li);
             });
@@ -192,7 +194,7 @@
        });
      }
 
-     input.addEventListener('blur', () => {
+    input.addEventListener('blur', () => {
       setTimeout(() => {
        selectOption();
       }, 150); // delay kecil agar klik tetap kebaca
@@ -227,6 +229,10 @@
         }
        resetOptions();
        options.style.display = 'none';
+       if(isFocused)
+        { newSelect.dispatchEvent(new Event('change'));
+        }
+       isFocused = false;
      }
 
     function resetOptions() {
@@ -246,6 +252,7 @@
       { input.value = e.target.textContent;
         setSelectValue(newSelect, e.target.dataset.value, e.target.textContent);
         options.style.display = 'none';
+        newSelect.dispatchEvent(new Event('change'));
       }
     });
 
@@ -308,7 +315,6 @@
         }
        select.value = value;
      }
-
 
   }
 
