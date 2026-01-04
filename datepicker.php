@@ -98,11 +98,10 @@
 
 <script>
 
- setDatePicker('dateInput');
+ setDatePicker(document.getElementById('dateInput'));
 
- function setDatePicker(inputId)
-  { const input = document.getElementById(inputId);
-    if(!input) return;
+ function setDatePicker(input)
+  { if(!input) return;
     // buat wrapper
     const wrapper = document.createElement('div');
     wrapper.className = 'datepicker';
@@ -140,144 +139,140 @@
     input.replaceWith(wrapper);
     wrapper.appendChild(box_input);
     wrapper.appendChild(calendar);
-    terapkanDatePicker(inputId);
+    
+    const datesContainer = newInput.parentNode.parentNode.querySelector('div.calendar-dates');
+    const monthSelect = newInput.parentNode.parentNode.querySelector('.monthSelect');
+    const yearLabel = newInput.parentNode.parentNode.querySelector('.yearLabel');
+    const prevYear = newInput.parentNode.parentNode.querySelector('.prevYear');
+    const nextYear = newInput.parentNode.parentNode.querySelector('.nextYear');
+    const clearInput = newInput.parentNode.querySelector('.clear-calender');
+    let currentDate = new Date();
+    let selectedDate = null;
+
+    //SET CLEAR INPUT
+    if(newInput.value == '')
+     { clearInput.style.display = 'none';
+     }
+    else
+     { clearInput.style.display = 'block';
+     }
+    clearInput.onclick = () => {
+     newInput.value = '';
+     clearInput.style.display = 'none';
+    }
+
+    //BUKA DATEPICKER
+    newInput.onclick = () => {
+     calendar.style.display = 'block';
+     const parsed = parseInputDate(newInput.value);
+     if(parsed)
+      { selectedDate = parsed;
+        currentDate = new Date(parsed);
+      }
+     initHeader();
+     renderCalendar();
+     ensureCalendarVisible(calendar);
+    };
+
+    //KLIK DI LUAR
+    document.addEventListener('click', e => {
+     if(!e.target.closest('.datepicker'))
+      { calendar.style.display = 'none';
+      }
+    });
+
+    //INIT HEADER
+    function initHeader()
+     { const months = ['Januari','Februari','Maret','April','Mei','Juni', 'Juli','Agustus','September','Oktober','November','Desember'];
+       monthSelect.innerHTML = '';
+       months.forEach((m, i) => {
+        monthSelect.add(new Option(m, i));
+       });
+       monthSelect.value = currentDate.getMonth();
+       yearLabel.textContent = currentDate.getFullYear();
+     }
+
+    //EVENT HEADER
+    monthSelect.onchange = () => {
+     currentDate.setMonth(parseInt(monthSelect.value));
+     renderCalendar();
+    };
+    prevYear.onclick = () => {
+     currentDate.setFullYear(currentDate.getFullYear() - 1);
+     yearLabel.textContent = currentDate.getFullYear();
+     renderCalendar();
+    };
+    nextYear.onclick = () => {
+     currentDate.setFullYear(currentDate.getFullYear() + 1);
+     yearLabel.textContent = currentDate.getFullYear();
+     renderCalendar();
+    };
+
+    //RENDER KALENDER
+    function renderCalendar()
+     { datesContainer.innerHTML = '';
+       const year = currentDate.getFullYear();
+       const month = currentDate.getMonth();
+       const firstDay = new Date(year, month, 1).getDay();
+       const daysInMonth = new Date(year, month + 1, 0).getDate();
+       for(let i = 0; i < firstDay; i++)
+        { datesContainer.appendChild(document.createElement('div'));
+        }
+       for(let d = 1; d <= daysInMonth; d++)
+        { const day = document.createElement('div');
+          day.textContent = d;
+          //TANDAI HARI INI
+          const today = new Date();
+          if(d === today.getDate() && month === today.getMonth() && year === today.getFullYear())
+           { day.classList.add('today');
+           }
+          //TANDAI TANGGAL TERPILIH
+          if(selectedDate && selectedDate.getDate() === d && selectedDate.getMonth() === month && selectedDate.getFullYear() === year)
+           { day.classList.add('selected');
+           }
+          day.onclick = () => {
+           selectedDate = new Date(year, month, d);
+           currentDate = new Date(selectedDate);
+           newInput.value = formatDate(selectedDate);
+           calendar.style.display = 'none';
+           clearInput.style.display = 'block';
+          };
+          datesContainer.appendChild(day);
+        }
+     }
+
+    //FORMAT & PARSE TANGGAL
+    function formatDate(date)
+     { const d = String(date.getDate()).padStart(2, '0');
+       const m = String(date.getMonth() + 1).padStart(2, '0');
+       const y = date.getFullYear();
+       return `${d}-${m}-${y}`;
+     }
+
+    function parseInputDate(value)
+     { if(!value) return null;
+       const parts = value.split('-');
+       if(parts.length !== 3) return null;
+       const day = parseInt(parts[0], 10);
+       const month = parseInt(parts[1], 10) - 1;
+       const year = parseInt(parts[2], 10);
+       const date = new Date(year, month, day);
+       if(date.getDate() !== day || date.getMonth() !== month || date.getFullYear() !== year) return null;
+       return date;
+     }
+
+    function ensureCalendarVisible(calendarEl)
+     { const rect = calendarEl.getBoundingClientRect();
+       const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+       if(rect.bottom > viewportHeight)
+        { const scrollAmount = rect.bottom - viewportHeight + 16; // jarak aman
+          window.scrollBy({
+           top : scrollAmount,
+           behavior : 'smooth'
+          });
+        }
+     }
   }
 
 
-function terapkanDatePicker(id)
- { const input = document.getElementById(id);
-   const calendar = input.parentNode.parentNode.querySelector('div.calendar') //document.getElementById('calendar');
-   const datesContainer = input.parentNode.parentNode.querySelector('div.calendar-dates');
-   const monthSelect = input.parentNode.parentNode.querySelector('.monthSelect');
-   const yearLabel = input.parentNode.parentNode.querySelector('.yearLabel');
-   const prevYear = input.parentNode.parentNode.querySelector('.prevYear');
-   const nextYear = input.parentNode.parentNode.querySelector('.nextYear');
-   const clearInput = input.parentNode.querySelector('.clear-calender');
-   let currentDate = new Date();
-   let selectedDate = null;
-
-   //SET CLEAR INPUT
-   if(input.value == '')
-    { clearInput.style.display = 'none';
-    }
-   else
-    { clearInput.style.display = 'block';
-    }
-   clearInput.onclick = () => {
-    input.value = '';
-    clearInput.style.display = 'none';
-   }
-
-   //BUKA DATEPICKER
-   input.onclick = () => {
-    calendar.style.display = 'block';
-    const parsed = parseInputDate(input.value);
-    if(parsed)
-     { selectedDate = parsed;
-       currentDate = new Date(parsed);
-     }
-    initHeader();
-    renderCalendar();
-    ensureCalendarVisible(calendar);
-   };
-
-   //KLIK DI LUAR
-   document.addEventListener('click', e => {
-    if(!e.target.closest('.datepicker'))
-     { calendar.style.display = 'none';
-     }
-   });
-
-   //INIT HEADER
-   function initHeader()
-    { const months = ['Januari','Februari','Maret','April','Mei','Juni', 'Juli','Agustus','September','Oktober','November','Desember'];
-      monthSelect.innerHTML = '';
-      months.forEach((m, i) => {
-       monthSelect.add(new Option(m, i));
-      });
-      monthSelect.value = currentDate.getMonth();
-      yearLabel.textContent = currentDate.getFullYear();
-    }
-
-   //EVENT HEADER
-   monthSelect.onchange = () => {
-    currentDate.setMonth(parseInt(monthSelect.value));
-    renderCalendar();
-   };
-   prevYear.onclick = () => {
-    currentDate.setFullYear(currentDate.getFullYear() - 1);
-    yearLabel.textContent = currentDate.getFullYear();
-    renderCalendar();
-   };
-   nextYear.onclick = () => {
-    currentDate.setFullYear(currentDate.getFullYear() + 1);
-    yearLabel.textContent = currentDate.getFullYear();
-    renderCalendar();
-   };
-
-   //RENDER KALENDER
-   function renderCalendar()
-    { datesContainer.innerHTML = '';
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      for(let i = 0; i < firstDay; i++)
-       { datesContainer.appendChild(document.createElement('div'));
-       }
-      for(let d = 1; d <= daysInMonth; d++)
-       { const day = document.createElement('div');
-         day.textContent = d;
-         //TANDAI HARI INI
-         const today = new Date();
-         if(d === today.getDate() && month === today.getMonth() && year === today.getFullYear())
-          { day.classList.add('today');
-          }
-         //TANDAI TANGGAL TERPILIH
-         if(selectedDate && selectedDate.getDate() === d && selectedDate.getMonth() === month && selectedDate.getFullYear() === year)
-          { day.classList.add('selected');
-          }
-         day.onclick = () => {
-          selectedDate = new Date(year, month, d);
-          currentDate = new Date(selectedDate);
-          input.value = formatDate(selectedDate);
-          calendar.style.display = 'none';
-          clearInput.style.display = 'block';
-         };
-         datesContainer.appendChild(day);
-       }
-    }
-
-   //FORMAT & PARSE TANGGAL
-   function formatDate(date)
-    { const d = String(date.getDate()).padStart(2, '0');
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const y = date.getFullYear();
-      return `${d}-${m}-${y}`;
-    }
-
-   function parseInputDate(value)
-    { if(!value) return null;
-      const parts = value.split('-');
-      if(parts.length !== 3) return null;
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const year = parseInt(parts[2], 10);
-      const date = new Date(year, month, day);
-      if(date.getDate() !== day || date.getMonth() !== month || date.getFullYear() !== year) return null;
-      return date;
-    }
-
-   function ensureCalendarVisible(calendarEl)
-    { const rect = calendarEl.getBoundingClientRect();
-      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-      if(rect.bottom > viewportHeight)
-       { const scrollAmount = rect.bottom - viewportHeight + 16; // jarak aman
-         window.scrollBy({
-          top : scrollAmount,
-          behavior : 'smooth'
-         });
-       }
-    }
-  }
 </script>
